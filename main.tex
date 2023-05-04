@@ -1,0 +1,53 @@
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+\begin{document}
+
+    \section{Executor Framework}\label{sec:executor-framework}
+
+    \begin{listing}
+        \item FixedThreadPool serve a creare un pool di thread con un numero fisso di thread.
+        Bisogna stare attenti a non eseguire task che richiedono un tempo di esecuzione molto lungo,
+        perch\`e potrebbero bloccare il pool di thread.
+        \item CachedThreadPool serve a creare un pool di thread con un numero variabile di thread,
+        nessun thread viene mai terminato a meno che non sia stato chiesto esplicitamente.
+        \item  SingleThreadExecutor serve a creare un pool di thread con un solo thread,
+        il thread viene mai terminato a meno che non sia stato chiesto esplicitamente.
+        \item ScheduledThreadPool serve a creare un pool di thread con un numero fisso di thread,
+        che possono essere schedulati per essere eseguiti dopo un certo periodo di tempo o periodicamente.
+        A differenza di fixedThreadPool, questo pool di thread pu\`o essere usato per eseguire task periodici.
+    \end{listing}
+
+    \subsection{EXECUTOR SERVICEe}\label{subsec:callable-e-future}
+
+    L'ExecutorService \`e un'interfaccia che estende l'interfaccia Executor,
+    che fornisce metodi per la gestione di un pool di thread.
+    \`E possibile terminare un ExecutorService con il metodo shutdown() o shutdownNow().
+    Mi permettono di dare una sincronizzazione tra il thread principale e il thread di esecuzione tramite
+    il metodo awaitTermination() che attende che tutti i task siano terminati (come se fosse un join()).
+
+    L\'executor service \`e asincrono, perch\`e non \`e possibile sapere quando un task \`e stato eseguito.
+    Per questo motivo \`e possibile utilizzare il metodo submit() che ritorna un oggetto Future.
+    Il metodo get() di Future ritorna il risultato del task, se il task non \`e ancora stato eseguito,
+    il metodo get() attende che il task sia eseguito.
+
+    Quanti task mettere in campo va deciso in base al numero di core del processore durante la fase di progettazione.
+    La callable e la future sono utili per avere un controllo maggiore sulle operazioni asincrone.
+    La callable permette di ritornare un valore, mentre la runnable non permette di ritornare un valore.
+    Quindi la callable pu\`o essere usata per eseguire operazioni che ritornano un valore, mentre la runnable pu\`o essere usata per eseguire
+    operazioni che non ritornano un valore.
+
+    \subsection{Fork - Join Framework}\label{subsec:fork-join-framework}
+
+    I fork-join framework sono un'alternativa ai thread per la gestione delle operazioni asincrone.
+    I fork-join framework sono pi\`u efficienti dei thread, perch\`e i thread hanno un costo di creazione pi\`u alto.
+
+    \subsection{CompletableFuture}\label{subsec:completable-future}
+    Le CompletableFuture sono un'alternativa ai fork-join framework.
+    Le CompletableFuture sono pi\`u semplici da usare dei fork-join framework, perch\`e non \`e necessario implementare un'interfaccia.
+    Estendendo la classe CompletableFuture, \`e possibile implementare un metodo che ritorna un CompletableFuture.
+    Mandiamo in esecuzione il task asincrono con il metodo runAsync() o supplyAsync().
+
+\end{document}

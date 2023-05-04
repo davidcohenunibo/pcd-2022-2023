@@ -5,7 +5,7 @@
 define
     MutualExclusion == []~(pc["p1"] = "CS" /\ pc["p2"] = "CS")
 end define;
-    
+
 process proc \in {"p1", "p2"}
 begin MainLoop:
   while TRUE do
@@ -51,5 +51,6 @@ Spec == Init /\ [][Next]_vars
 
 =============================================================================
 \* Modification History
+\* Last modified Mon Apr 03 15:19:36 CEST 2023 by Dach-
 \* Last modified Sun Mar 28 15:12:41 CEST 2021 by aricci
 \* Created Sun Mar 28 15:09:30 CEST 2021 by aricci

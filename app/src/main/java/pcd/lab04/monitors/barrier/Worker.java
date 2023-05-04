@@ -2,6 +2,13 @@ package pcd.lab04.monitors.barrier;
 
 import java.util.Random;
 
+
+/**
+ * A worker waits a random time before hitting the barrier
+ * and then waits for all the other workers to hit the barrier
+ * before continuing its execution
+ * The correct is that i see all thread before continue the execution
+ */
 public class Worker extends Thread {
 
 	private Barrier barrier;

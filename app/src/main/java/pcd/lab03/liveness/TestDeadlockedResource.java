@@ -12,5 +12,4 @@ public class TestDeadlockedResource {
 		new ThreadA(res).start();
 		new ThreadB(res).start();
 	}
-
 }

@@ -1,109 +1,107 @@
 --------------------------- MODULE step5_prodcons ---------------------------
 
-EXTENDS TLC, Integers, Sequences
-CONSTANTS MaxQueueSize
+EXTENDS Integers, Sequences, TLC, FiniteSets
 
-(*--algorithm message_queue
-variable queue = <<>>;
-define
-  BoundedQueue == Len(queue) <= MaxQueueSize 
-end define;
+CONSTANTS X, Y, N, BS
 
-process producer \in { "prod1", "prod2" } 
-variable item = "";
-begin Produce:
-  while TRUE do
-    produce:
-        item := "item";
-    put: 
-        await Len(queue) < MaxQueueSize;
-        queue := Append(queue, item);
-  end while;
+NP == N
+NC == N
+
+(*--algorithm Distribution
+VARIABLES buffer, readCount, writeCount, readSemaphore, writeSemaphore
+
+process WriteInterval(key \in SUBSET X, item \in Y)
+begin
+    WriteLoop:
+        await writeSemaphore[key] > 0;
+        writeSemaphore[key] := writeSemaphore[key] - 1;
+        await writeCount[key] = 0;
+        writeCount[key] := 1;
+        buffer[key] := <<item>>;
+        writeCount[key] := 0;
+        writeSemaphore[key] := writeSemaphore[key] + 1;
 end process;
 
-process consumer \in { "cons1", "cons2" }
-variable item = "none";
-begin Consume:
-  while TRUE do
-    take: 
-        await queue /= <<>>;
-        item := Head(queue);
-        queue := Tail(queue);
-    consume:
-        print item;
-  end while;
+process ReadInterval(key \in SUBSET X)
+variables list
+begin
+    ReadLoop:
+        await readSemaphore[key] > 0;
+        readSemaphore[key] := readSemaphore[key] - 1;
+        readCount[key] := readCount[key] + 1;
+        readSemaphore[key] := readSemaphore[key] + 1;
+        list := buffer[key];
+        await Len(list) <= N;
+        readCount[key] := readCount[key] - 1;
+        buffer[key] := SubSeq(buffer[key], Len(list)+1, Len(buffer[key]));
+        return list;
 end process;
-end algorithm;*)
 
-\* BEGIN TRANSLATION (chksum(pcal) = "26c3172" /\ chksum(tla) = "e7cb84b")
-\* Process variable item of process producer at line 13 col 10 changed to item_
-VARIABLES queue, pc
+process Producer(self)
+variables i
+begin
+    ProdLoop:
+        i := 0;
+        while i < BS
+        do 
+            i := i + 1;
+            Think: 
+                await pc[self] = "Think";
+                pc[self] := "ProdLoop";
+            ProdCrit: 
+                with in <- (in + 1) % BS,
+                     buffer[SUBSET X][in] <- self,
+                     count <- count + 1
+                do 
+                    if count = 1 then
+                        Signal(consSem);
+                    end if;
+                end with;
+                pc[self] := "Think";
+        end while;
+end process;
 
-(* define statement *)
-BoundedQueue == Len(queue) <= MaxQueueSize
+process Consumer(self)
+variables item
+begin
+    ConsLoop:
+        while TRUE
+        do 
+            Think: 
+                await pc[self] = "Think";
+                pc[self] := "ConsLoop";
+            with item <- ReadInterval(SUBSET X)
+            do 
+                with out <- (out + 1) % BS,
+                     count <- count - 1
+                do 
+                    if count = BS - 1 then
+                        Signal(prodSem);
+                    end if;
+                end with;
+                pc[self] := "Think";
+            end with;
+        end while;
+end process;
 
-VARIABLES item_, item
+(*-- Initial state of the algorithm *)
+Init == /\ buffer = [x \in SUBSET X |-> <<>>]
+        /\ readCount = [x \in SUBSET X |-> 0]
+        /\ writeCount = [x \in SUBSET X |-> 0]
+        /\ readSemaphore = [x \in SUBSET X |-> 0]
+        /\ writeSemaphore = [x \in SUBSET X |-> 1]
+        /\ pc = [i \in 1..NP+NC |-> "Think"]
+        /\ count = 0
+        /\ in = 0
+        /\ out = 0
+        /\ prodSem = 0
+        /\ consSem = 0
+        
+(*-- Next state of the algorithm *)
+Next == \/ /\ [self \in 1..NP |-> ProdLoop(self)]
+        \/ /\ [self \in NP+1..NP+NC |-> ConsLoop(self)]
+        \/ /\ [self \in 1..NP |
 
-vars == << queue, pc, item_, item >>
 
-ProcSet == ({ "prod1", "prod2" }) \cup ({ "cons1", "cons2" })
+=============================================
 
-Init == (* Global variables *)
-        /\ queue = <<>>
-        (* Process producer *)
-        /\ item_ = [self \in { "prod1", "prod2" } |-> ""]
-        (* Process consumer *)
-        /\ item = [self \in { "cons1", "cons2" } |-> "none"]
-        /\ pc = [self \in ProcSet |-> CASE self \in { "prod1", "prod2" } -> "Produce"
-                                        [] self \in { "cons1", "cons2" } -> "Consume"]
-
-Produce(self) == /\ pc[self] = "Produce"
-                 /\ pc' = [pc EXCEPT ![self] = "produce"]
-                 /\ UNCHANGED << queue, item_, item >>
-
-produce(self) == /\ pc[self] = "produce"
-                 /\ item_' = [item_ EXCEPT ![self] = "item"]
-                 /\ pc' = [pc EXCEPT ![self] = "put"]
-                 /\ UNCHANGED << queue, item >>
-
-put(self) == /\ pc[self] = "put"
-             /\ Len(queue) < MaxQueueSize
-             /\ queue' = Append(queue, item_[self])
-             /\ pc' = [pc EXCEPT ![self] = "Produce"]
-             /\ UNCHANGED << item_, item >>
-
-producer(self) == Produce(self) \/ produce(self) \/ put(self)
-
-Consume(self) == /\ pc[self] = "Consume"
-                 /\ pc' = [pc EXCEPT ![self] = "take"]
-                 /\ UNCHANGED << queue, item_, item >>
-
-take(self) == /\ pc[self] = "take"
-              /\ queue /= <<>>
-              /\ item' = [item EXCEPT ![self] = Head(queue)]
-              /\ queue' = Tail(queue)
-              /\ pc' = [pc EXCEPT ![self] = "consume"]
-              /\ item_' = item_
-
-consume(self) == /\ pc[self] = "consume"
-                 /\ PrintT(item[self])
-                 /\ pc' = [pc EXCEPT ![self] = "Consume"]
-                 /\ UNCHANGED << queue, item_, item >>
-
-consumer(self) == Consume(self) \/ take(self) \/ consume(self)
-
-Next == (\E self \in { "prod1", "prod2" }: producer(self))
-           \/ (\E self \in { "cons1", "cons2" }: consumer(self))
-
-Spec == Init /\ [][Next]_vars
-
-\* END TRANSLATION 
-
-=============================================================================
-\* Modification History
-\* Last modified Sun Mar 28 15:40:26 CEST 2021 by aricci
-\* Created Sun Mar 28 08:34:06 CEST 2021 by aricci
-
-=============================================================================
-\* Modification History
-\* Created Sun Mar 28 15:32:19 CEST 2021 by aricci

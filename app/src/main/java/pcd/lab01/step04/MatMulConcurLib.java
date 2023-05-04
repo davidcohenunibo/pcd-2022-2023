@@ -30,9 +30,12 @@ public class MatMulConcurLib {
 				workers[i].start();
 				irow += nrows;
 			}
+//			Ricrearli tutte le volte crea problemi d'inefficienza quando invece si potrebbe utilizzare un pool di
+//			threads riutilizzabili
 			workers[workers.length - 1] = new Worker(irow,matA.getNRows()-irow,matA,matB,matC);
 			workers[workers.length - 1].start();
-		
+
+
 			for (Worker w: workers){
 				w.join();
 			}				

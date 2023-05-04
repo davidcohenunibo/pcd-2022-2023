@@ -26,8 +26,7 @@ public class QuadratureService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}				
-
+		}
 		executor.shutdown();
 		executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);		
 		double res = result.getResult();

@@ -23,6 +23,7 @@ public class MatMulConcurLib {
 	
 	public Mat matmul(Mat matA, Mat matB) throws MatMulException {
 		Mat matC = new Mat(matA.getNRows(), matB.getNColumns());
+		//non è buona prassi creare l'executor ogni volta che si fa una moltiplicazione
 		exec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);		
 		try {
 			for (int i = 0; i < matA.getNRows(); i++){

@@ -7,12 +7,12 @@ public class MyThread extends Thread {
 	}
 	
 	public void run(){
-		System.out.println("Hello concurrent world! by " + getName());
+		System.out.println("Hello concurrent world! by " + getName() + " - " + System.currentTimeMillis());
 		try {
 			Thread.sleep(3000);
 		} catch (InterruptedException ex) {
 			ex.printStackTrace();
 		}
-		System.out.println("done.");
+		System.out.println("done. - "  + getName() + " - " + System.currentTimeMillis());
 	}
 }

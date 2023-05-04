@@ -1,5 +1,8 @@
 package pcd.lab06.executors.quad1_basic;
 
+/**
+ * Monitor object used to store the result of the computation.
+ */
 public class QuadratureResult {
 	
 	private double sum; 

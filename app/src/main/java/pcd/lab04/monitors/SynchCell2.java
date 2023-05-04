@@ -6,8 +6,8 @@ public class SynchCell2 {
 
 	private int value;
 	private boolean available;
-	private Lock mutex;   
-	private Condition isAvail;
+	private final Lock mutex;
+	private final Condition isAvail;
 
 	public SynchCell2(){
 		available = false;

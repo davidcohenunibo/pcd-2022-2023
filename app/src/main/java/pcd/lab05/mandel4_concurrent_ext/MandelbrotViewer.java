@@ -17,10 +17,11 @@ package pcd.lab05.mandel4_concurrent_ext;
  */
 public class MandelbrotViewer {
 	public static void main(String[] args) {
-		
+
 		int w = 1200;
 		int h = 800;
 		int nIter = 10000;
+		//provo a scrivere quqlcon
 		
 		MandelbrotSet set = new MandelbrotSet(w, h, nIter);
 		MandelbrotView view = new MandelbrotView(w, h);

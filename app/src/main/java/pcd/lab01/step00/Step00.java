@@ -14,7 +14,7 @@ public class Step00 {
 			ex.printStackTrace();
 		}
 		
-		System.out.println("Thread spawned - I'm " + myName);
+		System.out.println("Thread spawned - I'm " + myName  +  " - " + System.currentTimeMillis());
 		
 	}
 }

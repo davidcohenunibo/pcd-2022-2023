@@ -9,13 +9,17 @@ public class WorkerA extends Thread{
 		counter = c;
 		this.ntimes = ntimes;
 	}
-	
+
+// Qui serve un lock esterno
 	public void run(){
 		try {
 			for (int i = 0; i < ntimes; i++){
-				if (counter.getValue() > 0){
-					counter.dec();
+				synchronized (counter) {
+					if (counter.getValue() > 0){
+						counter.dec();
+					}
 				}
+
 			}
 		} catch (Exception ex){
 			ex.printStackTrace();

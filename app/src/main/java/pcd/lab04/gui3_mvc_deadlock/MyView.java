@@ -47,7 +47,12 @@ class MyView extends JFrame implements ActionListener, ModelObserver {
 			}
 		});
 	}
-	
+
+	/**
+	 * Add a thread to the event queue to show the frame
+	 * is not a good idea. It is possible that the event
+	 * queue is blocked by the EDT.
+	 */
 	public void show() {
 		SwingUtilities.invokeLater(() -> {
 			setVisible(true);

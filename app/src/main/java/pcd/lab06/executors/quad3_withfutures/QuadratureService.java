@@ -40,6 +40,11 @@ public class QuadratureService extends Thread {
 	    }
 	    System.out.printf("The result is %s\n", sum);
 		return sum;
+		//Anche la costruzione del risultato può essere fatta in parallelo
+		//Parallelizzando anche questo ciclo, si ottiene un miglioramento di prestazioni
+		//rispetto a quando si usa un executor con un solo thread
+		//Per farlo, nel momento della sum, si può usare un executor con un numero di thread pari al numero di task
+		//e si può usare un CompletableFuture per ogni task
 	}
 	
 	
